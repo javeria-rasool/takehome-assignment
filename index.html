@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+            color: #666;
+        }
+        .todo-item .delete {
+            float: right;
+            cursor: pointer;
+        }
+        .remaining {
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-todo">Add Todo</button>
+    <ul id="todo-list" class="todo-list"></ul>
+    <p id="remaining" class="remaining"></p>
+    <script>
+        // Get elements
+        const newTodoInput = document.getElementById('new-todo');
+        const addTodoButton = document.getElementById('add-todo');
+        const todoList = document.getElementById('todo-list');
+        const remainingCount = document.getElementById('remaining');
+
+        // Initialize todos from localStorage
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        // Function to render todos
+        function renderTodos() {
+            todoList.innerHTML = '';
+            let incompleteCount = 0;
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.classList.add('todo-item');
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                todoItem.innerHTML = `
+                    <span>${todo.text}</span>
+                    <button class="delete" data-index="${index}">Delete</button>
+                `;
+                todoList.appendChild(todoItem);
+                if (!todo.completed) {
+                    incompleteCount++;
+                }
+            });
+            remainingCount.textContent = `Remaining: ${incompleteCount}`;
+        }
+
+        // Event listeners
+        addTodoButton.addEventListener('click', () => {
+            const newTodoText = newTodoInput.value.trim();
+            if (newTodoText) {
+                todos.push({ text: newTodoText, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+                newTodoInput.value = '';
+            }
+        });
+
+        todoList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete')) {
+                const index = e.target.dataset.index;
+                todos.splice(index, 1);
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+            } else if (e.target.parentNode.classList.contains('todo-item')) {
+                const index = todos.findIndex((todo) => todo.text === e.target.parentNode.textContent);
+                todos[index].completed = !todos[index].completed;
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+            }
+        });
+
+        // Initial render
+        renderTodos();
+    </script>
+</body>
+</html>
