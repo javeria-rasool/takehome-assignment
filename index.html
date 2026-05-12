@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-todo">Add</button>
+    <ul id="todo-list"></ul>
+    <p id="remaining-items">Remaining items: 0</p>
+
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        function render() {
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.classList.add('todo-item');
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                todoItem.innerHTML = `<input type="checkbox" id="todo-${index}" ${todo.completed ? 'checked' : ''}>
+                                    <span>${todo.text}</span>`;
+                todoItem.addEventListener('click', () => {
+                    const checkbox = todoItem.querySelector('input[type="checkbox"]');
+                    todos[index].completed = checkbox.checked;
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+                todoItem.addEventListener('dblclick', () => {
+                    todos.splice(index, 1);
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+                todoList.appendChild(todoItem);
+            });
+            document.getElementById('remaining-items').textContent = `Remaining items: ${todos.filter(t => !t.completed).length}`;
+        }
+
+        render();
+
+        document.getElementById('add-todo').addEventListener('click', () => {
+            const newTodoText = document.getElementById('new-todo').value;
+            if (newTodoText.trim() !== '') {
+                todos.push({ text: newTodoText, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                render();
+                document.getElementById('new-todo').value = '';
+            }
+        });
+
+        document.getElementById('new-todo').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('add-todo').click();
+            }
+        });
+    </script>
+</body>
+</html>
