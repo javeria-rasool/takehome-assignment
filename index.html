@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+        }
+        .todo-item.delete {
+            background-color: #f00;
+            color: #fff;
+            cursor: pointer;
+        }
+        .todo-item.delete:hover {
+            background-color: #ff0000;
+        }
+        .remaining-count {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-todo">Add</button>
+    <ul id="todo-list" class="todo-list"></ul>
+    <p class="remaining-count">Remaining: <span id="remaining-count">0</span></p>
+    <script>
+        // Get elements
+        const newTodoInput = document.getElementById('new-todo');
+        const addTodoButton = document.getElementById('add-todo');
+        const todoList = document.getElementById('todo-list');
+        const remainingCountSpan = document.getElementById('remaining-count');
+
+        // Initialize todos from localStorage
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        // Function to render todos
+        function renderTodos() {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.classList.add('todo-item');
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                if (todo.deleted) {
+                    todoItem.classList.add('delete');
+                }
+                todoItem.textContent = todo.text;
+                todoItem.addEventListener('click', () => {
+                    if (todo.deleted) {
+                        todoList.removeChild(todoItem);
+                        todos = todos.filter((t, i) => i !== index);
+                        localStorage.setItem('todos', JSON.stringify(todos));
+                        renderTodos();
+                    } else {
+                        todo.completed = !todo.completed;
+                        todoItem.classList.toggle('completed');
+                        localStorage.setItem('todos', JSON.stringify(todos));
+                        renderTodos();
+                    }
+                });
+                todoList.appendChild(todoItem);
+            });
+            remainingCountSpan.textContent = todos.filter(todo => !todo.completed && !todo.deleted).length;
+        }
+
+        // Event listeners
+        addTodoButton.addEventListener('click', () => {
+            const newTodoText = newTodoInput.value.trim();
+            if (newTodoText) {
+                todos.push({ text: newTodoText, completed: false, deleted: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+                newTodoInput.value = '';
+            }
+        });
+
+        // Render initial todos
+        renderTodos();
+    </script>
+</body>
+</html>
