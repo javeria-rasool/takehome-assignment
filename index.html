@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .todo-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-todo">Add</button>
+    <ul id="todo-list"></ul>
+    <p id="remaining-items">Remaining items: 0</p>
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        const todoList = document.getElementById('todo-list');
+        const remainingItems = document.getElementById('remaining-items');
+        const newTodoInput = document.getElementById('new-todo');
+        const addTodoButton = document.getElementById('add-todo');
+
+        function render() {
+            todoList.innerHTML = '';
+            remainingItems.textContent = `Remaining items: ${todos.filter(t => !t.completed).length}`;
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.textContent = todo.text;
+                todoItem.classList.add('todo-item');
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = todo.completed;
+                checkbox.addEventListener('change', () => {
+                    todo.completed = checkbox.checked;
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => {
+                    todos.splice(index, 1);
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(deleteButton);
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        addTodoButton.addEventListener('click', () => {
+            const newTodoText = newTodoInput.value;
+            if (newTodoText.trim() !== '') {
+                todos.push({ text: newTodoText, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                render();
+                newTodoInput.value = '';
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>
