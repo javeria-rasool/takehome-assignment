@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Todo App</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 400px;
+			padding: 20px;
+			margin: 40px auto;
+			background-color: #f0f0f0;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		.todo-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+		.todo-item {
+			background-color: #fff;
+			padding: 10px;
+			padding-left: 20px;
+			padding-right: 20px;
+			border-bottom: 1px solid #ddd;
+		}
+		.todo-item.completed {
+			text-decoration: line-through;
+		}
+		.todo-item .delete {
+			float: right;
+			font-size: 18px;
+			cursor: pointer;
+		}
+		.todo-item .delete:hover {
+			color: #666;
+		}
+		.todo-count {
+			font-weight: bold;
+			font-size: 24px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<h1>Todo App</h1>
+	<input id="new-todo" type="text" placeholder="Enter new todo item">
+	<button id="add-todo">Add</button>
+	<ul id="todo-list"></ul>
+	<p id="todo-count"></p>
+	<script>
+		const todoList = document.getElementById('todo-list');
+		const newTodoInput = document.getElementById('new-todo');
+		const addTodoButton = document.getElementById('add-todo');
+		const todoCountElement = document.getElementById('todo-count');
+		let todos = JSON.parse(localStorage.getItem('todos')) || [];
+		
+		function renderTodos() {
+			todoList.innerHTML = '';
+			todos.forEach((todo, index) => {
+				const todoItem = document.createElement('li');
+				todoItem.classList.add('todo-item', todo.completed ? 'completed' : '');
+				todoItem.innerHTML = `
+					<span>${todo.text}</span>
+					<button class="delete" onclick="deleteTodo(${index})">×</button>
+				`; todoItem.querySelector('.delete').addEventListener('click', () => deleteTodo(index));
+				todoList.appendChild(todoItem);
+			});
+			todoCountElement.textContent = `Remaining: ${todos.filter(todo => !todo.completed).length}`;
+		}
+		
+		function addTodo() {
+			const newTodoText = newTodoInput.value.trim();
+			if (newTodoText) {
+				todos.push({ text: newTodoText, completed: false });
+				localStorage.setItem('todos', JSON.stringify(todos));
+				renderTodos();
+				newTodoInput.value = '';
+			}
+		}
+		
+		function deleteTodo(index) {
+			todos.splice(index, 1);
+			localStorage.setItem('todos', JSON.stringify(todos));
+			renderTodos();
+		}
+		
+		function toggleTodo(index) {
+			todos[index].completed = !todos[index].completed;
+			localStorage.setItem('todos', JSON.stringify(todos));
+			renderTodos();
+		}
+		
+		addTodoButton.addEventListener('click', addTodo);
+		newTodoInput.addEventListener('keypress', event => {
+			if (event.key === 'Enter') {
+				addTodo();
+			}
+		});
+		renderTodos();
+	</script>
+</body>
+</html>
