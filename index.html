@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+        }
+        .todo-item .delete-btn {
+            float: right;
+            background-color: #f00;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .todo-item .delete-btn:hover {
+            background-color: #ffa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-btn">Add</button>
+    <ul id="todo-list"></ul>
+    <p id="remaining-items">Remaining items: 0</p>
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        const todoList = document.getElementById('todo-list');
+        const addBtn = document.getElementById('add-btn');
+        const newTodoInput = document.getElementById('new-todo');
+        const remainingItemsCount = document.getElementById('remaining-items');
+
+        function render() {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.classList.add('todo-item');
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                todoItem.innerHTML = `
+                    <span>${todo.text}</span>
+                    <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+                `;
+                todoList.appendChild(todoItem);
+            });
+            remainingItemsCount.textContent = `Remaining items: ${todos.filter(todo => !todo.completed).length}`;
+        }
+
+        function addTodo() {
+            const newTodoText = newTodoInput.value.trim();
+            if (newTodoText) {
+                todos.push({ text: newTodoText, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                render();
+                newTodoInput.value = '';
+            }
+        }
+
+        function toggleCompleted(index) {
+            todos[index].completed = !todos[index].completed;
+            localStorage.setItem('todos', JSON.stringify(todos));
+            render();
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            localStorage.setItem('todos', JSON.stringify(todos));
+            render();
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        newTodoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>
