@@ -1,0 +1,1 @@
+body { font-family: Arial, sans-serif; } .todo { margin-bottom: 10px; } .todo.done { text-decoration: line-through; } .todo-count { font-size: 18px; }
