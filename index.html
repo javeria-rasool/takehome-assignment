@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 375px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        .todo-item {
+            margin-bottom: 10px;
+        }
+
+        .completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <input id="new-todo" type="text" placeholder="Enter new todo item">
+    <button id="add-btn">Add</button>
+    <ul id="todo-list"></ul>
+    <p id="remaining-items">Remaining items: 0</p>
+
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        function render() {
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.classList.add('todo-item');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = todo.completed;
+                checkbox.addEventListener('change', () => {
+                    todo.completed = checkbox.checked;
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+
+                const text = document.createElement('span');
+                text.textContent = todo.text;
+                text.style.textDecoration = todo.completed ? 'line-through' : 'none';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    todos.splice(index, 1);
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    render();
+                });
+
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(text);
+                todoItem.appendChild(deleteBtn);
+
+                todoList.appendChild(todoItem);
+
+                document.getElementById('remaining-items').textContent = `Remaining items: ${todos.filter(t => !t.completed).length}`;
+            });
+        }
+
+        render();
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+            const newTodoText = document.getElementById('new-todo').value;
+            if (newTodoText.trim() !== '') {
+                todos.push({ text: newTodoText, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                document.getElementById('new-todo').value = '';
+                render();
+            }
+        });
+
+        document.getElementById('new-todo').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('add-btn').click();
+            }
+        });
+    </script>
+</body>
+</html>
